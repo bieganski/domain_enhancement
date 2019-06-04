@@ -2,8 +2,9 @@
 
 from Bio import SeqIO
 
-# TODO tak naprawde to powinny sekwencje z outputu extend.py
-sekwencje = list(SeqIO.parse('./input-z2.fasta', format='fasta'))
+FASTA_OUT = 'blast_out.fa'
+
+sekwencje = list(SeqIO.parse(FASTA_OUT, format='fasta'))
 
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 

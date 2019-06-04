@@ -1,33 +1,48 @@
 #!/usr/bin/env python
-from Bio import SeqIO
 
-sekwencje = list(SeqIO.parse('./input-z2.fasta', format='fasta'))
-# sekwencje
+XML_OUT = 'blast_out.xml'
+FASTA_OUT = 'blast_out.fa'
 
 from Bio.Blast.Applications import NcbiblastpCommandline
+from Bio.Blast import NCBIXML
 
+blastp_cline = NcbiblastpCommandline(query='./input-z2.fasta', db='nr', outfmt=5, out=XML_OUT, remote=True)
 
-# inaczej :
-from Bio.Blast import NCBIWWW
-from Bio import SearchIO
+stdout, stderr = blastp_cline()
 
-blast_xml = 'alignments.xml'
-fasta_string = open('./input-z2.fasta')
-blast_out = 'alignments.fa'
+blast_results = NCBIXML.parse(open(XML_OUT))
 
-# with NCBIWWW.qblast("blastp", "nr", fasta_string.read()) as result_handle:
-#     with open(blast_xml, 'w') as xml_file:
-#         xml_file.write(result_handle.read())
-# parse xml and write to fasta
-blast_qresult = SearchIO.read(blast_xml, 'blast-xml')
+from pprint import pprint
+from Bio import SeqIO, SeqRecord, Seq
+
+ppdir = lambda x: pprint(dir(x))
+pt = lambda x: print(type(x))
+# TODO potrzebne?
+#  ungapped https://stackoverflow.com/questions/7430679/how-to-get-ungapped-sequences-from-blast-output
+#  https://www.biostars.org/p/287383/
+
 records = []
-for hit in blast_qresult:
-    records.append(hit[0].hit)
-SeqIO.write(records, blast_out, "fasta")
+# subjects = set()
+# queries = set()
+# matches = set()
+# i = 0
+for hit in blast_results:
+    # records.append(hit)
+    aligns = hit.alignments
+    ppdir = lambda x: pprint(dir(x))
+    pt = lambda x: print(type(x))
+    pt(hit.alignments[0])
+    for al in aligns:
+        for hsp in al.hsps:
+            nowySeq = Seq.Seq(hsp.sbjct)
+            nowySeqRecord = SeqRecord.SeqRecord(nowySeq, al.title)
+            records.append(nowySeqRecord)
+            # i += 1
+            # subjects.add(hsp.sbjct)
+            # queries.add(hsp.query)
+            # matches.add(hsp.match)
+            # print(hsp.sbjct)
 
-# blastp_cline = NcbiblastpCommandline(query='./input-z2.fasta', db='nr', outfmt=5, out='my_output.xml', remote=True)
-# print(blastp_cline)
-# stdout, stderr = blastp_cline()
-# print(stdout)
-# print(stderr)
+# print(i, len(subjects), len(queries), len(matches), len(queries.intersection(matches)))
 
+SeqIO.write(records, FASTA_OUT, "fasta")
