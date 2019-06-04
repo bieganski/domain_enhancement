@@ -24,8 +24,8 @@ class HMMER_wrapper:
         def http_error_302(self, req, fp, code, msg, headers):
             return headers
 
-    # OUT_FORMAT = 'tsv'
-    OUT_FORMAT = 'json'
+    OUT_FORMAT = 'tsv'
+    # OUT_FORMAT = 'json'
     NUM_RECORDS = 10
     HMM_SERVER_ADDR = 'https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan'
 
@@ -42,7 +42,7 @@ class HMMER_wrapper:
             'seq': '>{}\n{}'.format(seqrecord.name, seqrecord.seq)
         }
         parameters = {
-            'hmmdb': 'gene3d',
+            'hmmdb': 'pfam',
             'seq': '>2abl_A mol:protein length:163  ABL TYROSINE KINASE\nMGPSENDPNLFVALYDFVASGDNTLSITKGEKLRVLGYNHNGEWCEAQTKNGQGWVPSNYITPVNSLEKHSWYHGPVSRNAAEYLLSSGINGSFLVRESESSPGQRSISLRYEGRVYHYRINTASDGKLYVSSESRFNTLAELVHHHSTVADGLITTLHYPAP'
         }
         pprint(parameters)
@@ -73,18 +73,29 @@ class HMMER_wrapper:
         results_request = urllib.request.Request(self.full_url)
         data = urllib.request.urlopen(results_request)
         # pprint(str(data.read()).splitlines())
-        pprint(data.read())
+        from Bio.SearchIO import HmmerIO
+        from Bio import SearchIO
+        # hmmscan3-domtab
+
+        # lol = SearchIO.parse(f, 'hmmscan3-tab')
+        # # print(f.read())
+
+        # bytes = data.read()
+        # st = str(bytes.decode('utf-8'))
+        f = StringIO()
+        f.write(str(data.read().decode('utf-8')))
+        f.seek(0)
+        lol = SearchIO.parse(f, 'hmmscan3-domtab')
+        for el in lol:
+            print(el)
+        # print(st)
 
 if __name__ == '__main__':
-    from Bio import Seq, SeqRecord
-    dummySeq = SeqRecord.SeqRecord(Seq.Seq("dsdsd"), name="dsds")
-    HMM = HMMER_wrapper()
-    HMM(dummySeq)
-    # with open(FASTA_OUT, 'r') as f:
-    #     blast_results = SeqIO.parse(f, 'fasta')
-    #     HMM = HMMER_wrapper()
-    #     for el in blast_results:
-    #         # print(el)
-    #         pt(el)
-    #         HMM(el)
-    #         break
+    with open(FASTA_OUT, 'r') as f:
+        blast_results = SeqIO.parse(f, 'fasta')
+        HMM = HMMER_wrapper()
+        for el in blast_results:
+            # print(el)
+            pt(el)
+            HMM(el)
+            break
