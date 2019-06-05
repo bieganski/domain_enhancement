@@ -4,8 +4,6 @@ from Bio import SeqIO
 
 FASTA_OUT = 'blast_out.fa'
 
-sekwencje = list(SeqIO.parse(FASTA_OUT, format='fasta'))
-
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 from Bio import SeqRecord
 from io import StringIO
@@ -41,10 +39,10 @@ class HMMER_wrapper:
             'hmmdb': 'pfam',
             'seq': '>{}\n{}'.format(seqrecord.name, seqrecord.seq)
         }
-        parameters = {
-            'hmmdb': 'pfam',
-            'seq': '>2abl_A mol:protein length:163  ABL TYROSINE KINASE\nMGPSENDPNLFVALYDFVASGDNTLSITKGEKLRVLGYNHNGEWCEAQTKNGQGWVPSNYITPVNSLEKHSWYHGPVSRNAAEYLLSSGINGSFLVRESESSPGQRSISLRYEGRVYHYRINTASDGKLYVSSESRFNTLAELVHHHSTVADGLITTLHYPAP'
-        }
+        # parameters = {
+        #     'hmmdb': 'pfam',
+        #     'seq': '>2abl_A mol:protein length:163  ABL TYROSINE KINASE\nMGPSENDPNLFVALYDFVASGDNTLSITKGEKLRVLGYNHNGEWCEAQTKNGQGWVPSNYITPVNSLEKHSWYHGPVSRNAAEYLLSSGINGSFLVRESESSPGQRSISLRYEGRVYHYRINTASDGKLYVSSESRFNTLAELVHHHSTVADGLITTLHYPAP'
+        # }
         pprint(parameters)
         enc_params = urllib.parse.urlencode(parameters)
         enc_params = enc_params.encode('ascii')
@@ -82,7 +80,7 @@ class HMMER_wrapper:
         table = str(data.read().decode('utf-8')).splitlines()[1:]
         domains = set()
         for row in table:
-            domain, _ = self.parse_row(table[0])
+            domain, _ = self.parse_row(row)
             domains.add(domain)
         return list(domains)
         # f = StringIO()
@@ -107,30 +105,55 @@ class HMMER_wrapper:
 
 
 import argparse
+import csv
 
-def get_filename():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', help='Fasta filename', required=True)
-    return parser.parse_args().file
+def get_filenames():
+    return FASTA_OUT, "test.csv"
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-i', '--input', help='Fasta input filename', required=True)
+    # parser.add_argument('-o', '--output', help='CSV output filename', required=True)
+    # args = parser.parse_args()
+    # return args.input, args.output
 
-if __name__ == '__main__':
-    # file = get_filename()
-    file = FASTA_OUT # TODO delete
-    with open(file, 'r') as f:
-        blast_results = list(SeqIO.parse(f, 'fasta'))
+
+# TODO usunac \n z seq.names
+def generate_result_array(input):
+    with open(input, 'r') as f:
+        blast_results = list(SeqIO.parse(f, 'fasta'))[:5]
         HMM = HMMER_wrapper()
         seq2domains = {}
         domainsset = set()
         for seq in blast_results:
             domains = HMM(seq)
+            print(domains)
             domainsset.update(domains)
             seq2domains[seq.name] = domains
-            break
+
+        dom2id = {d : i for i, d in enumerate(domainsset, 1)}
+        seq2id = {seq.name : i for i, seq in enumerate(blast_results, 1)}
         names = [seq.name for seq in blast_results]
         num_seq = len(names)
         num_domains = len(domainsset)
-        res = []
-        res = [[None] * num_seq for _ in range(num_domains)]
-        res[0] = names
-        for k, v in seq2domains.items():
-            res[]
+        res = [[str(0)] * (num_domains + 1) for _ in range(num_seq + 1)]
+        # res[0] = names
+        print(names)
+        for i, name in enumerate(names, 1):
+            res[i][0] = name
+        # for i, domain in enumerate(domainsset, 1):
+        #     res[0][i] = domain
+        res[0] = ['xxx'] + list(domainsset)
+        for seq, dom_list in seq2domains.items():
+            for dom in dom_list:
+                res[seq2id[seq]][dom2id[dom]] = str(1)
+        pprint(res)
+        return res
+
+
+
+if __name__ == '__main__':
+    input, output = get_filenames()
+    res = generate_result_array(input)
+    with open(output, "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(res)
+
