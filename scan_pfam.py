@@ -26,7 +26,7 @@ class HMMER_wrapper:
 
     OUT_FORMAT = 'tsv'
     # OUT_FORMAT = 'json'
-    NUM_RECORDS = 10
+    NUM_RECORDS = 50
     HMM_SERVER_ADDR = 'https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan'
 
     def __init__(self):
@@ -66,7 +66,6 @@ class HMMER_wrapper:
         enc_res_params = urllib.parse.urlencode(res_params)
         self.full_url = results_url.replace('results','download') + '?' + enc_res_params
 
-        pass
     def __call__(self, seqrecord):
         assert isinstance(seqrecord, SeqRecord.SeqRecord)
         self.create_query_params(seqrecord)
@@ -80,22 +79,58 @@ class HMMER_wrapper:
         # lol = SearchIO.parse(f, 'hmmscan3-tab')
         # # print(f.read())
 
-        # bytes = data.read()
-        # st = str(bytes.decode('utf-8'))
-        f = StringIO()
-        f.write(str(data.read().decode('utf-8')))
-        f.seek(0)
-        lol = SearchIO.parse(f, 'hmmscan3-domtab')
-        for el in lol:
-            print(el)
+        table = str(data.read().decode('utf-8')).splitlines()[1:]
+        domains = set()
+        for row in table:
+            domain, _ = self.parse_row(table[0])
+            domains.add(domain)
+        return list(domains)
+        # f = StringIO()
+        # f.write(str(data.read().decode('utf-8')))
+        # f.seek(0)
+        # print(f.read())
+        # lol = SearchIO.parse(f, 'hmmscan3-domtab')
+        # for el in lol:
+        #     print(el)
         # print(st)
 
+    def parse_row(self, line):
+        els = line.split('\t')
+        TABLE_FAMILY_ID = 1
+        TABLE_EVALUE_ID = 10
+        try:
+            evalue = float(els[TABLE_EVALUE_ID])
+        except ValueError:
+            print("Bład wewnętrzny - problem z e-wartością ()".format(els[TABLE_EVALUE_ID]))
+            exit(1)
+        return els[TABLE_FAMILY_ID], evalue
+
+
+import argparse
+
+def get_filename():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--file', help='Fasta filename', required=True)
+    return parser.parse_args().file
+
 if __name__ == '__main__':
-    with open(FASTA_OUT, 'r') as f:
-        blast_results = SeqIO.parse(f, 'fasta')
+    # file = get_filename()
+    file = FASTA_OUT # TODO delete
+    with open(file, 'r') as f:
+        blast_results = list(SeqIO.parse(f, 'fasta'))
         HMM = HMMER_wrapper()
-        for el in blast_results:
-            # print(el)
-            pt(el)
-            HMM(el)
+        seq2domains = {}
+        domainsset = set()
+        for seq in blast_results:
+            domains = HMM(seq)
+            domainsset.update(domains)
+            seq2domains[seq.name] = domains
             break
+        names = [seq.name for seq in blast_results]
+        num_seq = len(names)
+        num_domains = len(domainsset)
+        res = []
+        res = [[None] * num_seq for _ in range(num_domains)]
+        res[0] = names
+        for k, v in seq2domains.items():
+            res[]
