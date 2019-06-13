@@ -2,8 +2,6 @@
 
 from Bio import SeqIO
 
-FASTA_OUT = 'blast_out.fa'
-
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 from Bio import SeqRecord
 from io import StringIO
@@ -37,7 +35,7 @@ class HMMER_wrapper:
         f.seek(0)
         parameters = {
             'hmmdb': 'pfam',
-            'seq': '>{}\n{}'.format(seqrecord.name, seqrecord.seq)
+            'seq': '>{}\n{}'.format(seqrecord.name, seqrecord.seq.ungap("-"))
         }
         # parameters = {
         #     'hmmdb': 'pfam',
@@ -108,24 +106,24 @@ import argparse
 import csv
 
 def get_filenames():
-    return FASTA_OUT, "test.csv"
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-i', '--input', help='Fasta input filename', required=True)
-    # parser.add_argument('-o', '--output', help='CSV output filename', required=True)
-    # args = parser.parse_args()
-    # return args.input, args.output
+    # return FASTA_OUT, "test.csv"
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', help='Fasta input filename', required=True)
+    parser.add_argument('-o', '--output', help='CSV output filename', required=True)
+    args = parser.parse_args()
+    return args.input, args.output
 
+from tqdm import tqdm
 
 # TODO usunac \n z seq.names
 def generate_result_array(input):
     with open(input, 'r') as f:
-        blast_results = list(SeqIO.parse(f, 'fasta'))[:5]
+        blast_results = list(SeqIO.parse(f, 'fasta'))
         HMM = HMMER_wrapper()
         seq2domains = {}
         domainsset = set()
-        for seq in blast_results:
+        for seq in tqdm(blast_results):
             domains = HMM(seq)
-            print(domains)
             domainsset.update(domains)
             seq2domains[seq.name] = domains
 
@@ -135,17 +133,12 @@ def generate_result_array(input):
         num_seq = len(names)
         num_domains = len(domainsset)
         res = [[str(0)] * (num_domains + 1) for _ in range(num_seq + 1)]
-        # res[0] = names
-        print(names)
         for i, name in enumerate(names, 1):
             res[i][0] = name
-        # for i, domain in enumerate(domainsset, 1):
-        #     res[0][i] = domain
         res[0] = ['xxx'] + list(domainsset)
         for seq, dom_list in seq2domains.items():
             for dom in dom_list:
                 res[seq2id[seq]][dom2id[dom]] = str(1)
-        pprint(res)
         return res
 
 
