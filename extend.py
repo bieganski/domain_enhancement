@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 
 XML_OUT = 'blast_out.xml'
-# FASTA_OUT = 'blast_out.fa'
-FASTA_OUT = 'matinek.fa'
+FASTA_OUT = 'blast_out.fa'
 
 from Bio.Blast.Applications import NcbiblastpCommandline
 from Bio.Blast import NCBIXML
 
 
 def do_things(evalue, identity):
-    blastp_cline = NcbiblastpCommandline(query='./input-z2.fasta',
-                                     db='nr',
-                                     outfmt=5,
-                                     out=XML_OUT,
-                                     remote=True,)
-
-    stdout, stderr = blastp_cline()
+    # blastp_cline = NcbiblastpCommandline(query='./input-z2.fasta',
+    #                                  db='nr',
+    #                                  outfmt=5,
+    #                                  out=XML_OUT,
+    #                                  remote=True,)
+    #
+    # stdout, stderr = blastp_cline()
 
     blast_results = NCBIXML.parse(open(XML_OUT))
 
@@ -41,7 +40,7 @@ def do_things(evalue, identity):
         pt(hit.alignments[0])
         for al in aligns:
             for hsp in al.hsps:
-                if hsp.evalue > evalue:
+                if hsp.expect > evalue:
                     continue
                 if hsp.identities / hsp.align_length < identity:
                     continue
