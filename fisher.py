@@ -14,10 +14,11 @@ def parse(handle):
     return domains, proteins, hits
 
 def fisher(N, K, n, x):
+    assert (type(N), type(K), type(n), type(x) == int, int, int, int)
     from scipy.special import binom
     res = float(0)
     for i in range(x, N + 1):
-        res += (binom(K, i)*binom(N - K, n - i)) / binom(N, n)
+        res += (binom(K, i) / binom(N, n) * binom(N - K, n - i))
     return res
 
 if __name__ == '__main__':
@@ -26,8 +27,8 @@ if __name__ == '__main__':
     # parser.add_argument('-f1', '--f1', help='First csv input filename', required=True)
     # parser.add_argument('-f2', '--f2', help='First csv input filename', required=True)
     args = parser.parse_args()
-    NAME1 = 'blast_hmm_out.csv'  # args.f1
-    NAME2 = 'nonblast_hmm_out.csv'  # args.f2
+    NAME1 = 'nonblast_hmm_out.csv'  # args.f2
+    NAME2 = 'blast_hmm_out.csv'  # args.f1
     handle1 = open(NAME1, 'r')
     domains1, proteins1, hits1 = parse(handle1)
     handle2 = open(NAME2, 'r')
