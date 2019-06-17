@@ -68,6 +68,7 @@ class HMMER_wrapper:
         results_request = urllib.request.Request(self.full_url)
         data = urllib.request.urlopen(results_request)
         # pprint(str(data.read()).splitlines())
+        # assert False
         from Bio.SearchIO import HmmerIO
         from Bio import SearchIO
         # hmmscan3-domtab
@@ -78,6 +79,8 @@ class HMMER_wrapper:
         table = str(data.read().decode('utf-8')).splitlines()[1:]
         domains = set()
         for row in table:
+            if len(row.split('\t')) <= 1:
+                continue
             domain, _ = self.parse_row(row)
             domains.add(domain)
         return list(domains)
@@ -92,6 +95,7 @@ class HMMER_wrapper:
 
     def parse_row(self, line):
         els = line.split('\t')
+        print("##########", els)
         TABLE_FAMILY_ID = 1
         TABLE_EVALUE_ID = 10
         try:

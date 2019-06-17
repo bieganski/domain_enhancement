@@ -37,16 +37,27 @@ def do_things(evalue, identity):
         aligns = hit.alignments
         ppdir = lambda x: pprint(dir(x))
         pt = lambda x: print(type(x))
-        pt(hit.alignments[0])
+        # pt(hit.alignments[0])
         for al in aligns:
             for hsp in al.hsps:
                 if hsp.expect > evalue:
                     continue
                 if hsp.identities / hsp.align_length < identity:
                     continue
-                nowySeq = Seq.Seq(hsp.sbjct)
-                nowySeqRecord = SeqRecord.SeqRecord(nowySeq, al.title)
-                records.append(nowySeqRecord)
+                # ppdir(al)
+                # print(al.hit_id.split('|')[1])
+                # print(al.hit_def)
+                # print(al.title)
+                # ppdir(hsp)
+                # ppdir(records)
+                # assert False, list(records)
+                records.append((al.hit_id.split('|')[1], al.hit_id))
+                # ...
+
+
+                # nowySeq = Seq.Seq(hsp.sbjct)
+                # nowySeqRecord = SeqRecord.SeqRecord(nowySeq, al.title)
+                # records.append(nowySeqRecord)
                 # i += 1
                 # subjects.add(hsp.sbjct)
                 # queries.add(hsp.query)
@@ -55,7 +66,16 @@ def do_things(evalue, identity):
 
     # print(i, len(subjects), len(queries), len(matches), len(queries.intersection(matches)))
 
-    SeqIO.write(records, FASTA_OUT, "fasta")
+    from Bio import Entrez
+    Entrez.email = 'bieganski.m@wp.pl'
+    handle = Entrez.efetch(db='protein', id=','.join([seq for seq, title in records]), retmode='xml')
+    entrez_records = list(Entrez.parse(handle))
+    handle.close()
+    # assert False, list(entrez_records)
+    # Seq.Seq(seq['GBSeq_sequence'])
+    recs = [SeqRecord.SeqRecord(Seq.Seq(seq['GBSeq_sequence']), title) for seq, title in zip(entrez_records, [t for _, t in records])]
+    # assert False, recs
+    SeqIO.write(recs, FASTA_OUT, "fasta")
 
 import argparse
 
