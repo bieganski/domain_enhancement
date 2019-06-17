@@ -18,7 +18,7 @@ def fisher(N, K, n, x):
     from scipy.special import binom
     res = float(0)
     for i in range(x, N + 1):
-        res += (binom(K, i) / binom(N, n) * binom(N - K, n - i))
+        res += (binom(K, i)/binom(N, n) * binom(N - K, n - i))
     return res
 
 if __name__ == '__main__':
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         n1, n2 = int(np.sum(hits1[:, i])), int(np.sum(hits2[:, j]))
         n = n1 + n2
         print("n=", n1, "+", n2)
-        x = int(np.sum(hits1))
-        print("x=", n1)
+        x = int(n1)
+        print("x=", x)
         res = fisher(N, K, n, x)
         print("Res = ", res)
