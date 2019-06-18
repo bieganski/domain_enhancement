@@ -50,5 +50,5 @@ if __name__ == '__main__':
         print("x=", x)
         res = fisher(N, K, n, x)
         print("Res = ", res)
-        _, res2 = fisher_exact()
+        _, res2 = fisher_exact([[x, K],[n2, N - K - n2]])
         print("Res2 = ", res2)
