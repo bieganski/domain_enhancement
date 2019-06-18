@@ -39,23 +39,23 @@ if __name__ == '__main__':
     print("K=", len(proteins1))
 
     from scipy.stats import fisher_exact
-    for i, dom in enumerate(domains1):
-        print('########## - ', dom)
-        n1 = int(np.sum(hits1[:, i]))
-        n2 = 0
-        try:
-            j = domains2.index(dom)
-            n2 = int(np.sum(hits2[:, j]))
-        except ValueError:
-            pass
-        n = n1 + n2
-        # print("n=", n1, "+", n2)
-        x = n1
-        # print("x=", x)
-        res = fisher(N, K, n, x)
-        # print("Res = ", res)
-        odds2, res2 = fisher_exact([[x, K - x],[n2, N - K - n2]], 'less')
-        print("Res2 = ", res2)
+    # for i, dom in enumerate(domains1):
+    #     print('########## - ', dom)
+    #     n1 = int(np.sum(hits1[:, i]))
+    #     n2 = 0
+    #     try:
+    #         j = domains2.index(dom)
+    #         n2 = int(np.sum(hits2[:, j]))
+    #     except ValueError:
+    #         pass
+    #     n = n1 + n2
+    #     # print("n=", n1, "+", n2)
+    #     x = n1
+    #     # print("x=", x)
+    #     res = fisher(N, K, n, x)
+    #     # print("Res = ", res)
+    #     odds2, res2 = fisher_exact([[x, K - x],[n2, N - K - n2]], 'greater')
+    #     print("Res2 = ", res2)
 
     print("-----------------------")
 
@@ -75,6 +75,6 @@ if __name__ == '__main__':
         # print("x=", x)
         res = fisher(N, K, n, x)
         # print("Res = ", res)
-        odds2, res2 = fisher_exact([[x, K - x],[n2, N - K - n2]], 'less')
+        odds2, res2 = fisher_exact([[x, K - x],[n2, N - K - n2]], 'greater')
         print("Res2 = ", res2)
 
