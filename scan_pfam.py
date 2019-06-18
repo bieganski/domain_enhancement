@@ -5,14 +5,6 @@ from Bio import SeqIO
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 from Bio import SeqRecord
 from io import StringIO
-import json
-
-# send a GET request to the server
-
-# print out the results
-from pprint import pprint
-pdir = lambda x : pprint(dir(x))
-pt = lambda x : print(type(x))
 
 class HMMER_wrapper:
     # install a custom handler to prevent following of redirects automatically.
@@ -21,7 +13,6 @@ class HMMER_wrapper:
             return headers
 
     OUT_FORMAT = 'tsv'
-    # OUT_FORMAT = 'json'
     NUM_RECORDS = 50
     HMM_SERVER_ADDR = 'https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan'
 
@@ -37,19 +28,11 @@ class HMMER_wrapper:
             'hmmdb': 'pfam',
             'seq': '>{}\n{}'.format(seqrecord.name, seqrecord.seq.ungap("-"))
         }
-        # parameters = {
-        #     'hmmdb': 'pfam',
-        #     'seq': '>2abl_A mol:protein length:163  ABL TYROSINE KINASE\nMGPSENDPNLFVALYDFVASGDNTLSITKGEKLRVLGYNHNGEWCEAQTKNGQGWVPSNYITPVNSLEKHSWYHGPVSRNAAEYLLSSGINGSFLVRESESSPGQRSISLRYEGRVYHYRINTASDGKLYVSSESRFNTLAELVHHHSTVADGLITTLHYPAP'
-        # }
-        pprint(parameters)
         enc_params = urllib.parse.urlencode(parameters)
         enc_params = enc_params.encode('ascii')
-        # enc_params.encode('utf-8')
 
-        # post the seqrch request to the server
         request = urllib.request.Request(self.HMM_SERVER_ADDR, enc_params)
 
-        # get the url where the results can be fetched from
         results_url = urllib.request.urlopen(request).get('location')
 
         # modify the range, format and presence of alignments in your results here
@@ -58,23 +41,15 @@ class HMMER_wrapper:
             'range': '1,{}'.format(self.NUM_RECORDS)
         }
 
-        # add the parameters to your request for the results
         enc_res_params = urllib.parse.urlencode(res_params)
         self.full_url = results_url.replace('results','download') + '?' + enc_res_params
+
 
     def __call__(self, seqrecord):
         assert isinstance(seqrecord, SeqRecord.SeqRecord)
         self.create_query_params(seqrecord)
         results_request = urllib.request.Request(self.full_url)
         data = urllib.request.urlopen(results_request)
-        # pprint(str(data.read()).splitlines())
-        # assert False
-        from Bio.SearchIO import HmmerIO
-        from Bio import SearchIO
-        # hmmscan3-domtab
-
-        # lol = SearchIO.parse(f, 'hmmscan3-tab')
-        # # print(f.read())
 
         table = str(data.read().decode('utf-8')).splitlines()[1:]
         domains = set()
@@ -84,18 +59,10 @@ class HMMER_wrapper:
             domain, _ = self.parse_row(row)
             domains.add(domain)
         return list(domains)
-        # f = StringIO()
-        # f.write(str(data.read().decode('utf-8')))
-        # f.seek(0)
-        # print(f.read())
-        # lol = SearchIO.parse(f, 'hmmscan3-domtab')
-        # for el in lol:
-        #     print(el)
-        # print(st)
+
 
     def parse_row(self, line):
         els = line.split('\t')
-        print("##########", els)
         TABLE_FAMILY_ID = 1
         TABLE_EVALUE_ID = 10
         try:
@@ -110,7 +77,6 @@ import argparse
 import csv
 
 def get_filenames():
-    # return FASTA_OUT, "test.csv"
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', help='Fasta input filename', required=True)
     parser.add_argument('-o', '--output', help='CSV output filename', required=True)
@@ -119,7 +85,6 @@ def get_filenames():
 
 from tqdm import tqdm
 
-# TODO usunac \n z seq.names
 def generate_result_array(input):
     with open(input, 'r') as f:
         blast_results = list(SeqIO.parse(f, 'fasta'))

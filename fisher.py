@@ -15,7 +15,6 @@ def parse(handle):
     return domains, proteins, hits
 
 def fisher(N, K, n, x):
-    assert (type(N), type(K), type(n), type(x) == int, int, int, int)
     res = float(0)
     for i in range(x, N + 1):
         res += (binom(K, i)/binom(N, n) * binom(N - K, n - i))
@@ -58,7 +57,7 @@ if __name__ == '__main__':
     #     print("Res2 = ", res2)
 
     print("-----------------------")
-
+    results = []
     K = len(proteins2)
     for i, dom in enumerate(domains2):
         print('########## - ', dom)
@@ -74,7 +73,11 @@ if __name__ == '__main__':
         x = n1
         # print("x=", x)
         res = fisher(N, K, n, x)
-        # print("Res = ", res)
+        print("Res = ", res)
         odds2, res2 = fisher_exact([[x, K - x],[n2, N - K - n2]], 'greater')
         print("Res2 = ", res2)
+        results.append([dom, str(res), str(res2)])
+    reshandle = open('results.csv', 'w')
+    a = csv.writer(reshandle, delimiter=',')
+    a.writerows(results)
 

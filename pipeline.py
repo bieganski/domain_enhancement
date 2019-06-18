@@ -15,8 +15,13 @@ OUT2 = 'blast_hmm_out.csv'
 
 F1 = 'nonblast_hmm_out.csv'
 F2 = 'blast_hmm_out.csv'
-os.system('./fisher.py -f1 {} -f2 {}'.format(F1, F2))
+# os.system('./fisher.py -f1 {} -f2 {}'.format(F1, F2))
 
 
+import matplotlib.pyplot as plt
+import csv
+
+a = csv.reader(open('results.csv'))
+assert False, list(a)
 
 
