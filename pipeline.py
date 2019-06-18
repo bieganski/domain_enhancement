@@ -22,6 +22,9 @@ import matplotlib.pyplot as plt
 import csv
 
 a = csv.reader(open('results.csv'))
-assert False, list(a)
+a = list(a)
+
+delta = [abs(impl1 - impl2) for _, impl1, impl2 in a]
+assert False, delta
 
 
