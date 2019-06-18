@@ -38,6 +38,7 @@ if __name__ == '__main__':
     K = len(proteins1)
     print("K=", len(proteins1))
 
+    from scipy.stats import fisher_exact
     for i, dom in enumerate(domains1):
         print('########## - ', dom)
         j = domains2.index(dom)
@@ -49,3 +50,5 @@ if __name__ == '__main__':
         print("x=", x)
         res = fisher(N, K, n, x)
         print("Res = ", res)
+        _, res2 = fisher_exact()
+        print("Res2 = ", res2)
